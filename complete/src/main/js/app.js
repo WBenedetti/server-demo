@@ -1,60 +1,46 @@
-const React = require('react');
-const ReactDOM = require('react-dom');
-const client = require('./client');
+import React, { Component } from 'react';
+import logo from './logo.svg';
+import './App.css';
 
-class App extends React.Component {
+const React = require("react")
+const logo = require("./logo.svg")
 
-	constructor(props) {
-		super(props);
-		this.state = {employees: []};
-	}
+class App extends Component {
+  state = {
+    isLoading: true,
+    groups: []
+  };
 
-	componentDidMount() {
-		client({method: 'GET', path: '/api/employees'}).done(response => {
-			this.setState({employees: response.entity._embedded.employees});
-		});
-	}
+  async componentDidMount() {
+    const response = await fetch('/api/products');
+    const body = await response.json();
+    this.setState({ products: body, isLoading: false });
+  }
 
-	render() {
-		return (
-			<EmployeeList employees={this.state.employees}/>
-		)
-	}
+  render() {
+    const {products, isLoading} = this.state;
+
+    if (isLoading) {
+      return <p>Loading...</p>;
+    }
+
+    return (
+      <div className="App">
+        <header className="App-header">
+          <img src={logo} className="App-logo" alt="logo" />
+          <h1 className="App-title">Welcome to React</h1>
+        </header>
+        <div className="App-intro">
+          <h2>JUG List</h2>
+          {products.map(product =>
+            <div key={product.id}>
+              {product.menuname}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 }
 
-class EmployeeList extends React.Component{
-	render() {
-		var employees = this.props.employees.map(employee =>
-			<Employee key={employee._links.self.href} employee={employee}/>
-		);
-		return (
-			<table>
-				<tbody>
-					<tr>
-						<th>First Name</th>
-						<th>Last Name</th>
-						<th>Description</th>
-					</tr>
-					{employees}
-				</tbody>
-			</table>
-		)
-	}
-}
-
-class Employee extends React.Component{
-	render() {
-		return (
-			<tr>
-				<td>{this.props.employee.firstName}</td>
-				<td>{this.props.employee.lastName}</td>
-				<td>{this.props.employee.description}</td>
-			</tr>
-		)
-	}
-}
-
-ReactDOM.render(
-		<App />,
-		document.getElementById('react')
-	)
+export default App;
